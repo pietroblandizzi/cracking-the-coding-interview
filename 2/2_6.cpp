@@ -39,7 +39,7 @@ public:
     void addNodeHead(int data);
     bool isListPlaindrome ();
     bool isListPlaindromeV2 ();
-    bool isListPlaindromeV3 (Node* n, Node* next, length);
+    bool isListPlaindromeV3 (Node* n, Node** next,int  length);
     void PrintList ();
     int getLength ();
 
@@ -168,11 +168,26 @@ bool List::isListPlaindromeV2 ()
  return true;
 }
 
-bool List::isListPlaindromeV3 (Node* n, Node* next, length)
+bool List::isListPlaindromeV3 (Node* n, Node** compare,int length)
 {
-    if (length == 0 || length ==1)
-
-
+    if (n == nullptr || length <= 0) {
+        *compare = n;
+        std::cout << " compare " <<(*compare)->data <<std::endl;
+        return true;
+    } else if (length == 1) {
+        (*compare) = n->next;
+        return true;
+    }
+     // I always pass the next
+     bool res = isListPlaindromeV3(n->next,compare,length-2);
+     // compare point to one after the middle
+     if (!res || compare == nullptr) {
+         return res;
+     }
+        std::cout << "n "<<n->data << " compare " <<(*compare)->data <<std::endl;
+      res = n->data == (*compare)->data ? 1 : 0;
+      (*compare) = (*compare)->next;
+      return res;
 }
 
 int main()
@@ -192,7 +207,13 @@ int main()
 
     l.PrintList();
     std::cout  << std::endl;
-    if (l.isListPlaindromeV2())
+  /*  if (l.isListPlaindromeV2())
+        std::cout << "yes";
+    else
+        std::cout << "no";
+*/
+    Node* compare;
+    if (l.isListPlaindromeV3(l.getHead(),&compare,7))
         std::cout << "yes";
     else
         std::cout << "no";
