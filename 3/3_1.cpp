@@ -6,13 +6,14 @@ class MultiStack
 {
     const int numOfStack = 3;
     int* values;
-    int v_size;
+    int stack_capacity;
     int* stack_size;
 
 public:
     MultiStack (int s);
     ~MultiStack ();
     bool isEmpty (int n);
+    bool isFull (int n);
     int peek (int n);  // n stack number
     void push (int n, int data);
     int pop (int n);
@@ -21,13 +22,13 @@ public:
 
 MultiStack::MultiStack(int s)
 {
-    v_size = s*numOfStack;
+    stack_capacity = s;
     stack_size = new int[numOfStack];
-    values = new int[v_size];
+    values = new int[stack_capacity*numOfStack];
     for (int i = 0; i<numOfStack; i++) {
         stack_size[i] = 0;
     }
-    for (int i = 0; i<v_size; i++) {
+    for (int i = 0; i<stack_capacity*numOfStack; i++) {
         values[i] = 0;
     }
 }
@@ -43,17 +44,26 @@ bool MultiStack::isEmpty(int n)
     return stack_size[n] == 0;
 }
 
+bool MultiStack::isFull(int n)
+{
+    return stack_size[n] == (stack_capacity);
+}
+
 int MultiStack::peek(int n)
 {
     if (!isEmpty(n))
-        return values [stack_size[n-1] + (n*v_size/3)];
+        return values [stack_size[n] + (n*stack_capacity)-1];
 
     throw  std::string("Empty stack");
 }
 
 int MultiStack::pop (int n) {
-    if (stack_size[n]!=0)
-        stack_size[n]--;
+    if (isEmpty(n))
+        throw std::string("Empty sack");
+
+    int value = values [stack_size[n] + (n*stack_capacity)-1];
+    stack_size[n]--;
+    return value;
 }
 
 void MultiStack::push (int n,int data)
@@ -61,16 +71,13 @@ void MultiStack::push (int n,int data)
    if (isFull (n))
     throw std::string("stack is full");
 
-   stack_size[n]++;
-
-    if (stack_size[n] < v_size/3)
-    values [stack_size[n] + (n*v_size/3)] = data;
     stack_size[n]++;
+    values [stack_size[n] + (n*stack_capacity)-1] = data;
 }
 
 void MultiStack::printAll()
 {
-    for (int i = 0; i< v_size;i++) {
+    for (int i = 0; i< stack_capacity*numOfStack;i++) {
         std::cout << values[i] << " ";
     }
     std::cout<<std::endl;
@@ -79,6 +86,7 @@ void MultiStack::printAll()
 
 int main()
 {
+    try {
     //3 Stack array of 10 values;
     MultiStack ms(3);
     if (ms.isEmpty(0)) std::cout << "stack 1 empty" << std::endl;
@@ -95,10 +103,12 @@ int main()
     ms.printAll();
 
     std::cout << ms.peek(2) << std::endl;
-    ms.pop(2);
+    std::cout << ms.pop(2) << std::endl;
     ms.push(2,7);
+    ms.push(2,7);
+    ms.push(0,7);
     ms.printAll();
 
-
+    }catch (std::string e) {std::cout << e;}
     return 0;
 }
