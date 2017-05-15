@@ -37,7 +37,7 @@ public:
     MyStack (int v);
     //rule of the three
     ~MyStack ();
-    MyStack(const MyStack& o);
+   // MyStack(const MyStack& o);
     MyStack& operator= (const MyStack& o);
 
     void push (int data);
@@ -71,14 +71,14 @@ MyStack& MyStack::operator= (const MyStack& o)
     }
     return *this;
 }
-
+/*
 MyStack::MyStack(const MyStack& o)
 {
     v_size = o.v_size;
     values = new int[o.v_size];
     stack_size = 0;
     std::copy (o.values,o.values + o.v_size,values);
-}
+}*/
 
 MyStack::~MyStack ()
 {
@@ -136,8 +136,8 @@ Using a normal stack to create the set of stacks
 class SetOfStacks
 {
     //or i could use a Stack* and reserve some memory
-    int stack_size;
-    std::vector<MyStack> stackset;
+    int sstack_size;
+    std::vector<MyStack*> stackset;
     int n_of_stacks;
     void shift (int index);
     void shiftV2 (int index);
@@ -153,45 +153,33 @@ public:
 
 SetOfStacks::SetOfStacks(int s)
 {
-  stack_size = s;
+  sstack_size = s;
   n_of_stacks = 0;
 }
 
 void SetOfStacks::push(int data)
 {
-    if (n_of_stacks == 0) {
-                std::cout << "New stack created"<< std::endl;
-        MyStack s(stack_size);
-        stackset.push_back(s);
-        stackset[n_of_stacks].push(data);
-        n_of_stacks++;
-    }
-    else if (stackset[n_of_stacks-1].isFull()) {
-        //create a new one
-                        std::cout << "New stack created"<< std::endl;
-        MyStack s(stack_size);
-        stackset.push_back(s);
-        stackset[n_of_stacks].push(data);
+    if (n_of_stacks == 0 || stackset[n_of_stacks-1]->isFull() ) {
+        std::cout << "New stack created"<< std::endl;
+        stackset.push_back(new MyStack(sstack_size));
+        stackset[n_of_stacks]->push(data);
         n_of_stacks++;
     }
     else {
-        stackset[n_of_stacks-1].push(data);
+        stackset[n_of_stacks-1]->push(data);
     }
 }
 
 int SetOfStacks::pop ()
 {
-    if (n_of_stacks == 0 || stackset[n_of_stacks-1].isEmpty())
+    if (n_of_stacks == 0 || stackset[n_of_stacks-1]->isEmpty())
         throw std::string("stack Empty ");
 
-     int v =   stackset[n_of_stacks-1].pop();
+     int v =   stackset[n_of_stacks-1]->pop();
     //we do not need the stack anymore //
-    if (stackset[n_of_stacks-1].isEmpty()){
+    if (stackset[n_of_stacks-1]->isEmpty()){
         stackset.pop_back();
         n_of_stacks--;
-        std::cout << "New set size " << stackset.size() <<std::endl;
-        std::cout << stackset[n_of_stacks-1].stack_size<< std::endl;
-        std::cout << "New stack deleted"<< std::endl;
     }
 
     return v;
@@ -199,10 +187,10 @@ int SetOfStacks::pop ()
 
 int SetOfStacks::peek ()
 {
- if (n_of_stacks == 0 || stackset[n_of_stacks-1].isEmpty())
+ if (n_of_stacks == 0 || stackset[n_of_stacks-1]->isEmpty())
         throw std::string("stack Empty ");
 
-    return stackset[n_of_stacks-1].peek();
+    return stackset[n_of_stacks-1]->peek();
 }
 /** Two way of thinking about it.
 If You allow stacks to be not full then u can
@@ -215,12 +203,12 @@ int SetOfStacks::popAt (int index)
     if (index < 0 || index >= n_of_stacks)
             throw std::string("Out of range");
 
-    if (n_of_stacks == 0 || stackset[index].isEmpty())
+    if (n_of_stacks == 0 || stackset[index]->isEmpty())
         throw std::string("stack Empty ");
 
-     int v =   stackset[index].pop();
+     int v =   stackset[index]->pop();
     //we do not need the stack anymore //
-    if (stackset[index].isEmpty()){
+    if (stackset[index]->isEmpty()){
         //shift from end to index!!!
         shift (index);
         n_of_stacks--;
@@ -247,10 +235,10 @@ int SetOfStacks::popAtV2 (int index)
     if (index < 0 || index >= n_of_stacks)
             throw std::string("Out of range");
 
-        if (n_of_stacks == 0 || stackset[index].isEmpty())
+        if (n_of_stacks == 0 || stackset[index]->isEmpty())
         throw std::string("stack Empty ");
 
-     int v =   stackset[index].pop();
+     int v =   stackset[index]->pop();
         //shift from end to index!!!
         shiftV2 (index);
 
@@ -261,7 +249,7 @@ void SetOfStacks::shiftV2 (int index)
 {
     if (index == n_of_stacks-1) {
         //we pop from the last
-        if (stackset[index].isEmpty())
+        if (stackset[index]->isEmpty())
         stackset.pop_back();
 
         return;
@@ -269,9 +257,9 @@ void SetOfStacks::shiftV2 (int index)
     for (int i = index; i < n_of_stacks-1; i++) {
         //we need a correct assignment operator
 
-        while (!stackset[i].isFull()) {
-            stackset[i].push(stackset[i+1].values[0]);
-            stackset[i+1].leftShift();
+        while (!stackset[i]->isFull()) {
+            stackset[i]->push(stackset[i+1]->values[0]);
+            stackset[i+1]->leftShift();
         }
     }
         std::cout << "Shift"<< std::endl;
@@ -302,7 +290,6 @@ int main()
     s.push(7);
     s.push(8);
     s.push(9);
-    std::cout <<"ci sono" << std::endl;
     //lets try to pop at 1
   /*  std::cout << s.popAt(1) <<std::endl;
     std::cout << s.popAt(1) <<std::endl;
@@ -314,9 +301,9 @@ int main()
     //std::cout << s.popAt(1) <<std::endl;
 
     /***V2**/
-  //  std::cout << s.popAtV2(1) <<std::endl;
-  //  std::cout << s.popAtV2(1) <<std::endl; // should pop 7
-   // std::cout << s.popAtV2(1) <<std::endl;
+    std::cout << s.popAtV2(1) <<std::endl;
+    std::cout << s.popAtV2(1) <<std::endl; // should pop 7
+    std::cout << s.popAtV2(1) <<std::endl;
 
 
 
